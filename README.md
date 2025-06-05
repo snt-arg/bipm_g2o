@@ -127,9 +127,10 @@ To set up the environment without Docker, follow these steps:
 ├── docker/
 │   ├── Dockerfile         # Reproducible build
 │   └── startup.sh         # Entry point inside container
-├── src/                   # Source files
+├── include/bipm_g2o/      # Header files
 ├── examples/              # Demonstrations (e.g., ACC)
 ├── CMakeLists.txt         # Build configuration
+├── LICENSE                
 └── README.md
 ```
 
