@@ -53,7 +53,15 @@ target_link_libraries(example ${G2O_LIBRARIES} Eigen3::Eigen fmt::fmt)
 #----------------------------------------------------------------------------------------
 
 
- 
-#add_definitions(-DUSE_AL)  # Uncomment if you want to use AL
+# Configuration option: Default to USE_BIPM, but allow switching to USE_AL
+option(USE_BIPM "Build with BIPM features (disable for AL)" ON)
+
+if(USE_BIPM)
+    message(STATUS "Building with USE_BIPM enabled")
+    add_definitions(-DUSE_BIPM)
+else()
+    message(STATUS "Building with USE_AL enabled (USE_BIPM disabled)")
+    add_definitions(-DUSE_AL)
+endif()
 
 

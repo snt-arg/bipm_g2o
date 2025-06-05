@@ -297,7 +297,7 @@ void SparseOptimizerAL::updateMultipliers(EdgeType &edge) {
 
     if constexpr (is_eq) {
       auto multiplier = edge.lagrangeMultiplier();
-      multiplier.setConstant(_init_lagrange_multiplier);
+      multiplier.setConstant(_lagrange_multiplier_initial);
       edge.setLagrangeMultiplier(multiplier);
 
       Eigen::Matrix<double, D, 1> rho_bar =

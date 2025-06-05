@@ -153,7 +153,7 @@ int SparseOptimizerAL::optimize(int iterations, bool online) {
 
       // termination criteria
       i++;
-      innerLoopStop = i >= _max_num_inner_iterations ||
+      innerLoopStop = i >= _num_inner_iterations_max ||
                       cjIterations >= iterations || terminate() ||
                       verifyConvergence(-1 * 10) || !ok;
 

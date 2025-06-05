@@ -50,10 +50,10 @@ OP: min ||xy(1)-a||^2 +  ||xy(2)-b||^2 + ||z-c||^2 s.t.    xy(2) + z == 3, xy(1)
 
 #include "bipm_g2o/linear_solver_eigen_lu.h"
 
-#ifdef USE_AL
-#include "bipm_g2o/sparse_optimizer_al.h" // using the Augmented Lagrangian
-#else
+#ifdef USE_BIPM
 #include "bipm_g2o/sparse_optimizer_bipm.h" // Barrier interior point method
+#else
+#include "bipm_g2o/sparse_optimizer_al.h" // using the Augmented Lagrangian
 #endif
 
 #include "include/example_vertices_edges.h" // for defining the edges
@@ -69,10 +69,10 @@ int main(int argc, char **argv) {
   std::cout << "x_start<int> y_start<int> z_start<int> " << std::endl;
   std::cout << "./example 0 150 2 9 50 -10 -10 -10" << std::endl;
 
-#ifdef USE_AL
-  std::cout << "The Augumented Lagrangian Solver is Used";
-#else
+#ifdef USE_BIPM
   std::cout << " The Barriar Interior Point Solver is Used";
+#else
+  std::cout << "The Augumented Lagrangian Solver is Used";
 #endif
 
   int argCount = 1;
@@ -100,22 +100,32 @@ int main(int argc, char **argv) {
   int zStart = (argc > argCount) ? std::atoi(argv[argCount]) : -10;
 
 // Initialize optimizer
-#ifdef USE_AL
-  g2o::SparseOptimizerAL optimizer;
-  optimizer.setRhoInitial(1.0); // initial value for the barrier function parameter
-  optimizer.setRhoUpdateFactor(100.0); // update factor for the barrier function parameter
-  optimizer.setRhoMax(1.0e10); // maximum value for the barrier function parameter
-  optimizer.setLagrangeMultiplierInitial(0.0); // initial value for the Lagrangian vertex of the Equality constraints
-  optimizer.setInnerIterationsMax(100); // maximum number of inner iterations  
-#else
+#ifdef USE_BIPM
   g2o::SparseOptimizerBIPM optimizer;
-
-  // Add the solver settings, kappa is the the barrier parameter [ -1/kappa log(-g(x))]
-  optimizer.setKappaInitial(1.0); // initial value for the barrier function parameter
-  optimizer.setKappaUpdateFactor(50.0); // update factor for the barrier function parameter
-  optimizer.setKappaFinal(1.0e5); // maximum value for the barrier function parameter
-  optimizer.setLagrangeMultiplierInitial(0.0); // initial value for the Lagrangian vertex of the Equality constraints
-  optimizer.setInnerIterationsMax(100); // maximum number of inner iterations  
+  // Add the solver settings, kappa is the the barrier parameter [ -1/kappa
+  // log(-g(x))]
+  optimizer.setKappaInitial(
+      1.0); // initial value for the barrier function parameter
+  optimizer.setKappaUpdateFactor(
+      50.0); // update factor for the barrier function parameter
+  optimizer.setKappaFinal(
+      1.0e5); // maximum value for the barrier function parameter
+  optimizer.setLagrangeMultiplierInitial(
+      0.0); // initial value for the Lagrangian vertex of the Equality
+            // constraints
+  optimizer.setInnerIterationsMax(100); // maximum number of inner iterations
+#else
+  g2o::SparseOptimizerAL optimizer;
+  optimizer.setRhoInitial(
+      1.0); // initial value for the barrier function parameter
+  optimizer.setRhoUpdateFactor(
+      100.0); // update factor for the barrier function parameter
+  optimizer.setRhoMax(
+      1.0e10); // maximum value for the barrier function parameter
+  optimizer.setLagrangeMultiplierInitial(
+      0.0); // initial value for the Lagrangian vertex of the Equality
+            // constraints
+  optimizer.setInnerIterationsMax(100); // maximum number of inner iterations
 #endif
 
   optimizer.setVerbose(true);
@@ -195,7 +205,6 @@ int main(int argc, char **argv) {
   // Optimize
   optimizer.initializeOptimization();
   class terminationCriterionType;
-
 
   optimizer.setEpsilonConvergence(1e-3); // Stopping criterion for update norm
   optimizer.setEpsilonConstraint(1e-3);
