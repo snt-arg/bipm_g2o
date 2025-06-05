@@ -166,7 +166,7 @@ public:
          // Typically between 5 and 100 (default is 20).
   double _kappa_final =
       1500; // Maximum value for the barrier function parameter
-  bool _reset_lagrange_multipliers = true;
+  bool _reset_lagrange_multipliers = false;
 };
 
 template <int D, typename E, typename... VertexTypes>

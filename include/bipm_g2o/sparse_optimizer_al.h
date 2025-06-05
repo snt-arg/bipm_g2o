@@ -162,7 +162,7 @@ protected:
  
   bool _useSlackVariables = true; // Using slack variables for the inequality
                                   // constraints. it does not appear directly
-  bool _reset_lagrange_multipliers = true;
+  bool _reset_lagrange_multipliers = false;
 
   std::vector<std::shared_ptr<g2o::OptimizableGraph::Vertex>>
       _vEqLagrangeMultipliers; // Set of Lagrangian vertices
