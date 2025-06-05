@@ -150,7 +150,7 @@ The BIPM solver shows faster convergence and better scalability compared to AL, 
 
 ## 📜 License
 
-This project is released under an open-source license. See `LICENSE` for details.
+This project is open-source and distributed under GPL-3.0
 
 ---
 
