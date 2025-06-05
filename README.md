@@ -1,4 +1,4 @@
-# BIPM-g2o: Barrier Interior Point Method for Constrained Factor Graph Optimization
+# BIPM_g2o: Barrier Interior Point Method for Constrained Factor Graph Optimization
 
 This repository extends the `g2o` framework with support for **inequality constraints** using the **Barrier Interior Point Method (BIPM)**. It introduces a new class of factor graph nodes that implement logarithmic barrier functions, enabling efficient and robust constrained optimization for robotics control problems such as Model Predictive Control (MPC).
 
