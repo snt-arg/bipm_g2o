@@ -211,9 +211,6 @@ int main(int argc, char **argv) {
 
   optimizer.optimize(numberOfIterations);
 
-  optimizer.optimize(numberOfIterations);
-
-
   // Output the results
   std::cout << "Optimized x: " << xy->estimate().transpose() << std::endl;
   std::cout << "Optimized z: " << z->estimate() << std::endl;

@@ -41,11 +41,7 @@ double SparseOptimizerAL::getRhoUpdateFactor() { return _rho_update_factor; }
 
 // Setter solver paramters
 void SparseOptimizerAL::resetLagrangeMultiplierEq() {
-  for (auto &vertex : _vEqLagrangeMultipliers) {
-    vertex->setToOrigin();
-  }
-
-  // update the multiplier for Equality constraints
+  // update the multiplier for Equality constraints and reset also the panelty paramters
   for (auto &edge : _activeEdgesEq) {
     executeEqMultiplierUpdate(edge);
   }
