@@ -54,7 +54,9 @@ target_link_libraries(example ${G2O_LIBRARIES} Eigen3::Eigen fmt::fmt)
 
 
 # Configuration option: Default to USE_BIPM, but allow switching to USE_AL
-option(USE_BIPM "Build with BIPM features (disable for AL)" ON)
+#option(USE_BIPM "Build with BIPM features (disable for AL )" ON)
+option(USE_BIPM "Build with AL features (disable for BIPM )" OFF)
+
 
 if(USE_BIPM)
     message(STATUS "Building with USE_BIPM enabled")

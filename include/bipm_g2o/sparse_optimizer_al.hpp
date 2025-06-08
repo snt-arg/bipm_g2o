@@ -88,7 +88,7 @@ int SparseOptimizerAL::optimize(int iterations, bool online) {
   bool outerLoopStop = false;
   bool ok = true;
 
-  if (_warm_start_lagrange_multiplier_flag) {
+  if (!_warm_start_lagrange_multiplier_flag) {
     _reset_lagrange_multipliers = true;
     resetLagrangeMultiplierEq();
     for (auto &edge : _activeEdgesIneq) {
