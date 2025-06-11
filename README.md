@@ -13,7 +13,7 @@ This project provides:
 
 ### Reference
 
-> *From Inference to Optimal Control: Barrier-Based Factor Graphs for Model Predictive Control*  
+> *Barrier Method for Inequality Constrained Factor Graphs Optimization Applied to MPC*  
 > Submitted to IEEE RAL.
 
 This project introduces BIPM as a robust and efficient alternative to Augmented Lagrangian (AL) for constrained optimization in factor graphs.
