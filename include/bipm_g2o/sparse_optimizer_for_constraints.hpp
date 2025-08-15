@@ -31,8 +31,9 @@ using namespace std;
 
 // Default constructor
 template <typename Derived>
-SparseOptimizerForConstraints<Derived>::SparseOptimizerForConstraints() =
-    default;
+SparseOptimizerForConstraints<Derived>::SparseOptimizerForConstraints() {
+ defineAlphaBacktracking(_alpha);
+};
 
 // Default destructor
 template <typename Derived>
@@ -347,6 +348,46 @@ template<typename Derived>
 double SparseOptimizerForConstraints<Derived>::getLagrangeMultiplierInitial() {
   return _lagrange_multiplier_initial;
 }
+
+
+
+
+template <typename Derived>
+void SparseOptimizerForConstraints<Derived>::setAlphaBacktrackingValue(double alpha){
+_alpha = alpha;
+} 
+ 
+
+
+template <typename Derived>
+void SparseOptimizerForConstraints<Derived>::defineAlphaBacktracking(double alpha) {
+    if (alpha == -1.0) {
+     _alphaBacktracking = {1, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.25, 0.2, 
+                              0.15, 0.1, 0.09, 0.08, 0.06, 0.05, 0.04, 0.03, 
+                              0.02, 0.01, 0.008, 0.007, 0.006, 0.005, 0.004, 
+                              0.003, 0.002, 1e-3, 1e-4, 1e-5, 1e-7, 1e-9, 1e-10, 
+                              1e-12, 1e-14, 1e-16, 1e-18, 1e-20, 1e-25, 1e-30};                              
+    return;
+    } // the default case 
+
+    if (alpha > 0 && alpha < 1){
+    _alphaBacktracking.clear();
+    _alphaBacktracking.reserve(100);  // Pre-allocate memory to avoid reallocations
+    _alphaBacktracking.push_back(1);
+    while (_alphaBacktracking.back() > 1e-30){
+      _alphaBacktracking.push_back(_alphaBacktracking.back() * alpha);
+    }
+    } else  {
+    std::cerr << "[Error] Invalid alpha value for backtracking: " << alpha
+              << ". It must be between 0 and 1. or -1.0 for the default case" << std::endl;
+    }
+     std::cout << "Alpha Backtracking Values: ";
+    for (const double& val : _alphaBacktracking) {
+        std::cout << val << " ";
+    }
+    std::cout << std::endl;
+
+    }
 
 
 } // namespace g2o

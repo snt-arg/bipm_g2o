@@ -121,6 +121,8 @@ class G2O_CORE_API SparseOptimizerForConstraints : public SparseOptimizer {
     bool getWarmStartLagrangeMultiplierFlag();
     int getInnerIterationsMax();
     double getLagrangeMultiplierInitial();
+    void setAlphaBacktrackingValue(double alpha);
+
 
  
 
@@ -142,9 +144,12 @@ class G2O_CORE_API SparseOptimizerForConstraints : public SparseOptimizer {
    int _num_inner_iterations_max; // Maximum number of inner iterations for the AL algorithm
    bool _warm_start_lagrange_multiplier_flag = false; // Flag to indicate if the Lagrangian multiplier should be warmed up
   // solver parameter
+   std::vector<double> _alphaBacktracking;
+   double _alpha = .90;
+
  
-   std::vector<double> _alphaBacktracking = {1,0.9,.8,.7,.6,.5,.4,.3,.25,.2,.15,.1,0.09,0.08,0.06,0.05,0.04,0.03,0.02,0.01, 0.008,0.007,0.006,.005,.004,.003, 0.002, 1e-3, 1e-4, 1e-5,1e-7, 1e-9, 1e-10,1e-12, 1e-14, 1e-16, 1e-18, 1e-20};
-};
+   void defineAlphaBacktracking(double alpha);
+  };
 
 
 
