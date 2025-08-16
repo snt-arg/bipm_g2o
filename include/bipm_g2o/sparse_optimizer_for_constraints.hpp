@@ -381,11 +381,7 @@ void SparseOptimizerForConstraints<Derived>::defineAlphaBacktracking(double alph
     std::cerr << "[Error] Invalid alpha value for backtracking: " << alpha
               << ". It must be between 0 and 1. or -1.0 for the default case" << std::endl;
     }
-     std::cout << "Alpha Backtracking Values: ";
-    for (const double& val : _alphaBacktracking) {
-        std::cout << val << " ";
-    }
-    std::cout << std::endl;
+     
 
     }
 
