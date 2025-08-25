@@ -78,7 +78,7 @@ bool SparseOptimizerForConstraints<Derived>::initializeOptimization(
             break;
           }
         }
-        if (allVerticesOK && !e->allVerticesFixed()) {
+       if (allVerticesOK && !e->allVerticesFixed()) {
           auxEdgeSet.insert(e);
           levelEdges++;
         }

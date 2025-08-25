@@ -47,16 +47,36 @@ include_directories(${G2O_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIR} ${CMAKE_CURRENT_SO
 link_directories(${G2O_LIBRARY_DIRS})
 
 
+
+#  min ||xy(1)-a||^2 +  ||xy(2)-b||^2 + ||z-c||^2 
+#  s.t.    xy(2) + z == 3, xy(1)+ xy(2) == 2.5      xy <= {1, 4}   z <= 5
 # add executable test
 add_executable(example example/example.cpp)
 target_link_libraries(example ${G2O_LIBRARIES} Eigen3::Eigen fmt::fmt)
-#----------------------------------------------------------------------------------------
+
+
+
+
+# add executable test
+# minimize     0.5 * ||x1-1||^2 + 0.5 * ||x2-1||^2
+#    subject to    x1^2 + x2^2 - 1 = 0
+#                  4*x1^2 + 0.25*x2^2 - 1 <= 0
+add_executable(example_2 example/example_2.cpp)
+target_link_libraries(example_2 ${G2O_LIBRARIES} Eigen3::Eigen fmt::fmt)
+
+
+
+
+#     minimize     0.5*||x1 + e^(-x2)||^2 + 0.5*||x1^2 + 2*x2 + 1||^2
+#    subject to    x1 + x1^3 + x2 + x2^2  = 0                
+# add executable test
+add_executable(example_3 example/example_3.cpp)
+target_link_libraries(example_3 ${G2O_LIBRARIES} Eigen3::Eigen fmt::fmt)
 
 
 # Configuration option: Default to USE_BIPM, but allow switching to USE_AL
-#option(USE_BIPM "Build with BIPM features (disable for AL )" ON)
-option(USE_BIPM "Build with AL features (disable for BIPM )" ON)
-
+option(USE_BIPM "Build with BIPM features (disable for AL )" OFF)
+ 
 
 if(USE_BIPM)
     message(STATUS "Building with USE_BIPM enabled")

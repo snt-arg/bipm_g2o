@@ -145,7 +145,7 @@ class G2O_CORE_API SparseOptimizerForConstraints : public SparseOptimizer {
    bool _warm_start_lagrange_multiplier_flag = false; // Flag to indicate if the Lagrangian multiplier should be warmed up
   // solver parameter
    std::vector<double> _alphaBacktracking;
-   double _alpha = .90;
+   double _alpha = 0.9;
 
  
    void defineAlphaBacktracking(double alpha);

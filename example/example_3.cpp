@@ -28,15 +28,9 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 */
 
 /*
-     minimize     (xy(1)-2)^2 +  (xy(2)-9)^2 + (z-50)^2
-     subject to   xy(2) + z    == 3, xy(1) + xy(2)    == 2.5, 
-                   xy(0)<= 1,  y<= 4, z<= 5
-%
- note that xy(1) = x, and xy(2) = y, z is a scalar variable
-% The answer is x = 1, y = 1.5, z = 1.5
-
-OP: min ||xy(1)-a||^2 +  ||xy(2)-b||^2 + ||z-c||^2 
-     s.t.    xy(2) + z == 3, xy(1)+ xy(2) == 2.5      xy <= {1, 4}   z <= 5
+     minimize     0.5*||x1 + e^(-x2)||^2 + 0.5*||x1^2 + 2*x2 + 1||^2
+    subject to    x1 + x1^3 + x2 + x2^2  = 0
+                   
 */
 
 #include <g2o/core/block_solver.h>
@@ -48,7 +42,7 @@ OP: min ||xy(1)-a||^2 +  ||xy(2)-b||^2 + ||z-c||^2
 #include <Eigen/Core>
 #include <iostream>
 
-#include "bipm_g2o/linear_solver_eigen_lu.h"
+#include "bipm_g2o/linear_solver_eigen_qr.h"
 
 #ifdef USE_BIPM
 #include "bipm_g2o/sparse_optimizer_bipm.h" // Barrier interior point method
@@ -56,48 +50,35 @@ OP: min ||xy(1)-a||^2 +  ||xy(2)-b||^2 + ||z-c||^2
 #include "bipm_g2o/sparse_optimizer_al.h" // using the Augmented Lagrangian
 #endif
 
-#include "include/example_vertices_edges.h" // for defining the edges
+#include "include/example_3_vertices_edges.h" // for defining the edges
 
 int main(int argc, char **argv) {
-  std::cout << "OP: min ||xy(1)-a||^2 +  ||xy(2)-b||^2 + ||z-c||^2 s.t.    "
-               "xy(2) + z == 3, xy(1) + xy(2) == 2.5, xy <= {1, 4}   z <= 5"
+  std::cout << "OP: min  0.5*||x1 + e^(-x2)||^2 + 0.5*||x1^2 + 2*x2 + 1||^2 s.t.    "
+               " x1 + x1^3 + x2 + x2^2  = 0"
             << std::endl;
   std::cout
       << "Usage: " << argv[0]
       << "solverType:<0=GN,1=LV,2=DL> iterations<int> a<int> b<int> c<int>"
       << std::endl;
   std::cout << "x_start<int> y_start<int> z_start<int> " << std::endl;
-  std::cout << "./example 0 150 2 9 50 -10 -10 -10" << std::endl;
+  std::cout << "./example -0.2 -0.2 0 150" << std::endl;
 
 #ifdef USE_BIPM
-  std::cout << " The Barriar Interior Point Solver is Used";
+  std::cout << " The Barriar Interior Point Solver is Used\n";
 #else
-  std::cout << "The Augumented Lagrangian Solver is Used";
+  std::cout << "The Augumented Lagrangian Solver is Used\n";
 #endif
 
   int argCount = 1;
+  double xStart = (argc > argCount) ? std::atof(argv[argCount]) : -1.2 ;
+
+  argCount++;
+  double yStart = (argc > argCount) ? std::atof(argv[argCount]) : -1;
+  argCount++;
   int solverType = (argc > argCount) ? std::atoi(argv[argCount]) : 0;
 
   argCount++;
   int numberOfIterations = (argc > argCount) ? std::atoi(argv[argCount]) : 150;
-
-  argCount++;
-  int a = (argc > argCount) ? std::atoi(argv[argCount]) : 2;
-
-  argCount++;
-  int b = (argc > argCount) ? std::atoi(argv[argCount]) : 9;
-
-  argCount++;
-  int c = (argc > argCount) ? std::atoi(argv[argCount]) : 50;
-
-  argCount++;
-  int xStart = (argc > argCount) ? std::atoi(argv[argCount]) : -10;
-
-  argCount++;
-  int yStart = (argc > argCount) ? std::atoi(argv[argCount]) : -10;
-
-  argCount++;
-  int zStart = (argc > argCount) ? std::atoi(argv[argCount]) : -10;
 
 // Initialize optimizer
 #ifdef USE_BIPM
@@ -117,15 +98,14 @@ int main(int argc, char **argv) {
 #else
   g2o::SparseOptimizerAL optimizer;
   optimizer.setRhoInitial(
-      1.0); // initial value for the barrier function parameter
+      11.0); // initial value for the barrier function parameter
   optimizer.setRhoUpdateFactor(
-      100.0); // update factor for the barrier function parameter
-  optimizer.setRhoMax(
-      1.0e10); // maximum value for the barrier function parameter
+      20.0);                // update factor for the barrier function parameter
+  optimizer.setRhoMax(5e5); // maximum value for the barrier function parameter
   optimizer.setLagrangeMultiplierInitial(
       0.0); // initial value for the Lagrangian vertex of the Equality
             // constraints
-  optimizer.setInnerIterationsMax(100); // maximum number of inner iterations
+  optimizer.setInnerIterationsMax(10); // maximum number of inner iterations
 #endif
 
   optimizer.setVerbose(true);
@@ -135,9 +115,8 @@ int main(int argc, char **argv) {
       linearSolver;
   std::unique_ptr<g2o::OptimizationAlgorithm> algorithm;
 
-  std::cout << "Using EigenLU linear solver" << std::endl;
-  linearSolver = std::make_unique<
-      g2o::LinearSolverEigenLU<g2o::BlockSolverX::PoseMatrixType>>();
+   linearSolver = std::make_unique<
+      g2o::LinearSolverEigenQR<g2o::BlockSolverX::PoseMatrixType>>();
 
   blockSolver = std::make_unique<g2o::BlockSolverX>(std::move(linearSolver));
 
@@ -165,41 +144,17 @@ int main(int argc, char **argv) {
   xy->setEstimate(Eigen::Vector2d(xStart, yStart)); // initial estimate
   optimizer.addVertex(xy.get());
 
-  // Create and add vertices
-  auto *z = new VertexZ();
-  z->setId(1);
-  z->setEstimate(zStart);
-  optimizer.addVertex(z);
-
-  // Add the cost edgeXY to the optimizer: |xy(1)-a||^2 +  ||xy(2)-b||^2
+  // Add the cost edgeXY to the optimizer: 0.5*||x1 + e^(-x2)||^2 + 0.5*||x1^2 + 2*x2 + 1||^2
   auto edgeXY = std::make_shared<EdgeXY>();
   edgeXY->setVertex(0, xy.get());
-  edgeXY->setMeasurement(Eigen::Vector2d(a, b)); //
-  edgeXY->setInformation(Eigen::Matrix2d::Identity());
+  edgeXY->setMeasurement(Eigen::Vector2d(0, 0)); //
+  edgeXY->setInformation(Eigen::Matrix2d::Identity() * 0.5);
   optimizer.addEdge(edgeXY.get());
 
-  // Add the cost edgeZ to the optimizer: ||z-c||^2
-  auto edgeZ = std::make_shared<EdgeZ>();
-  edgeZ->setVertex(0, z);
-  edgeZ->setMeasurement(c);
-  edgeZ->setInformation(Eigen::Matrix<double, 1, 1>::Identity());
-  optimizer.addEdge(edgeZ.get());
 
-  // add inequality edge xy<= {1,4}
-  auto edgeIneqXY = std::make_shared<EdgeIneqXY>(); //
-  edgeIneqXY->setVertex(0, xy.get());
-  optimizer.addEdgeIneq(edgeIneqXY.get());
-
-  // add inequality edge z<= 5
-  auto edgeIneqZ = std::make_shared<EdgeIneqZ>(); // (y - b)^2
-  edgeIneqZ->setVertex(0, z);
-  optimizer.addEdgeIneq(edgeIneqZ.get());
-
-  // add equaity edge xy(2) + z == 3, xy(1) + xy(2) == 2.5
-  auto *edgeEq = new EdgeEq();
+  auto *edgeEq = new EdgeEq(); // add x1 + x1^3 + x2 + x2^2 = 0
   edgeEq->setVertexLagrangeMultiplierId(10);
   edgeEq->setVertex(0, xy.get());
-  edgeEq->setVertex(1, z);
   optimizer.addEdgeEq(edgeEq);
 
   // Optimize
@@ -213,7 +168,6 @@ int main(int argc, char **argv) {
 
   // Output the results
   std::cout << "Optimized x: " << xy->estimate().transpose() << std::endl;
-  std::cout << "Optimized z: " << z->estimate() << std::endl;
 
   // std::cout << "Optimized nu: " << nu->estimate() << std::endl;
 
