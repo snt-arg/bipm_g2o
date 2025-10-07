@@ -116,8 +116,7 @@ public:
   */
 
   void executeIneqMultiplierUpdate(void *edgePtr);
-  void executeEqMultiplierUpdate(void* edgePtr);
-
+  void executeEqMultiplierUpdate(void *edgePtr);
 
   // virtual void defineAlphaBacktracking() {      }
   template <int D, typename E, typename... VertexTypes, typename EdgeType>
@@ -131,35 +130,30 @@ public:
 
 public:
   // Setter for the mu value
-   void setRho(double rho);
-   void setRhoInitial(double rhoInitial);
-   void setRhoMax(double rhoMax);
-   void setRhoUpdateFactor(double rhoUpdateFactor);
-   
-   //getter for the solver parameters
-   double getRho();
-   double getRhoInitial();
-   double getRhoMax();
-   double getRhoUpdateFactor();
+  void setRho(double rho);
+  void setRhoInitial(double rhoInitial);
+  void setRhoMax(double rhoMax);
+  void setRhoUpdateFactor(double rhoUpdateFactor);
 
-
-
+  // getter for the solver parameters
+  double getRho();
+  double getRhoInitial();
+  double getRhoMax();
+  double getRhoUpdateFactor();
 
   // Setter function
   void setAlphaBacktracking(std::vector<double> alphaBacktracking);
   void resetLagrangeMultiplierEq() override;
 
-
 protected:
   std::unordered_map<void *, std::function<void()>>
       updateMultipliersIneqFunctionMap;
 
-
-  double  _rho_min = .00001;  // Minimum value for the penalty parameter
-  double _rho_initial = 10; // Initial value for the penalty parameter
-  double _rho_max = 500; // Maximum value for the penalty parameter
+  double _rho_min = .00001;      // Minimum value for the penalty parameter
+  double _rho_initial = 10;      // Initial value for the penalty parameter
+  double _rho_max = 500;         // Maximum value for the penalty parameter
   double _rho_update_factor = 5; // Update factor for the penalty parameter
- 
+
   bool _useSlackVariables = true; // Using slack variables for the inequality
                                   // constraints. it does not appear directly
   bool _reset_lagrange_multipliers = false;
@@ -226,32 +220,30 @@ bool SparseOptimizerAL::addEdgeEqImpl(
     return false;
   }
 
- 
-    vLagrangian->setFixed(true);
+  vLagrangian->setFixed(true);
 
-    Eigen::Matrix<double, D, 1> rho_bar =
-        Eigen::Matrix<double, D, 1>::Constant(_rho_initial);
+  Eigen::Matrix<double, D, 1> rho_bar =
+      Eigen::Matrix<double, D, 1>::Constant(_rho_initial);
 
-    // In equality constraints, the information matrix 2D is used to store the
-    // constraint violation and the rho_bar we initialize the the constraint
-    // violation to error and rho_bar to as initial value Assign first D
-    // diagonal entries from `error.segment(0, D)
-    e->setConstraintViolationPrev(e->error().segment(0, D).cwiseAbs());
-    e->setConstraintViolationPrev(std::move(rho_bar), D);
+  // In equality constraints, the information matrix 2D is used to store the
+  // constraint violation and the rho_bar we initialize the the constraint
+  // violation to error and rho_bar to as initial value Assign first D
+  // diagonal entries from `error.segment(0, D)
+  e->setConstraintViolationPrev(e->error().segment(0, D).cwiseAbs());
+  e->setConstraintViolationPrev(std::move(rho_bar), D);
 
-    e->setRho(rho_bar);
+  e->setRho(rho_bar);
 
-    // set the ConstructQuadraticFormImpl function
-    auto lambda = [this](BaseFixedSizedEdgeEq<D, E, VertexTypes...> &edge) {
-      this->constructQuadraticFormEq(edge);
-    };
-    e->setConstructQuadraticFormImpl(lambda);
+  // set the ConstructQuadraticFormImpl function
+  auto lambda = [this](BaseFixedSizedEdgeEq<D, E, VertexTypes...> &edge) {
+    this->constructQuadraticFormEq(edge);
+  };
+  e->setConstructQuadraticFormImpl(lambda);
 
-    // Store the function in a map instead
-    updateMultipliersEqFunctionMap[e] = [this, e]() {
-      this->updateMultipliers<D, E, VertexTypes...>(*e);
-    };
-  
+  // Store the function in a map instead
+  updateMultipliersEqFunctionMap[e] = [this, e]() {
+    this->updateMultipliers<D, E, VertexTypes...>(*e);
+  };
 
   // add teh edge to the set of inequality set
   _edgeEqSet.insert(e);
@@ -309,7 +301,7 @@ void SparseOptimizerAL::updateMultipliers(EdgeType &edge) {
       // violation to error and rho_bar to as initial value Assign first D
       // diagonal entries from `error.segment(0, D)
       edge.setConstraintViolationPrev(edge.error().segment(0, D).cwiseAbs());
-      edge.setConstraintViolationPrev(std::move(rho_bar), D); 
+      edge.setConstraintViolationPrev(std::move(rho_bar), D);
       return;
     }
   }
@@ -336,6 +328,13 @@ void SparseOptimizerAL::updateMultipliers(EdgeType &edge) {
 
   for (int i = 0; i < D; ++i) {
     [[maybe_unused]] double x_d = 0, x_i = 0;
+
+    // update mulitplier
+    if constexpr (is_ineq) {
+      multiplier[i] = std::max(0.0, multiplier[i] + 2 * rho[i] * error[i]);
+    } else if constexpr (is_eq) {
+      multiplier[i] = multiplier[i] + 2 * rho[i] * error[i];
+    }
 
     switch (2) {
     case 1:
@@ -375,13 +374,6 @@ void SparseOptimizerAL::updateMultipliers(EdgeType &edge) {
       if (rho[i] > rho_max)
         rho[i] = rho_max;
       break;
-    }
-
-    // update mulitplier
-    if constexpr (is_ineq) {
-      multiplier[i] = std::max(0.0, multiplier[i] + 2 * rho[i] * error[i]);
-    } else if constexpr (is_eq) {
-      multiplier[i] = multiplier[i] + 2 * rho[i] * error[i];
     }
   }
 
@@ -446,6 +438,6 @@ void SparseOptimizerAL::constructQuadraticFormEq(
 
 } // namespace g2o
 
-#include"sparse_optimizer_al.hpp"
+#include "sparse_optimizer_al.hpp"
 
 #endif // G2O_GRAPH_OPTIMIZER_BIPM_H_
