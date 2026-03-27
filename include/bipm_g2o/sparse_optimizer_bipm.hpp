@@ -231,7 +231,7 @@ int SparseOptimizerBIPM::optimize(int iterations, bool online) {
   }
   while (!outerLoopStop) { 
      
-    int i = 1;
+    int i = 0;
     innerLoopStop = false;
     // BIPM - Inner loop
     while (!innerLoopStop) {
