@@ -70,7 +70,7 @@ int main(int argc, char **argv) {
 #endif
 
   int argCount = 1;
-  double xStart = (argc > argCount) ? std::atof(argv[argCount]) : -1.2 ;
+  double xStart = (argc > argCount) ? std::atof(argv[argCount]) : -1 ;
 
   argCount++;
   double yStart = (argc > argCount) ? std::atof(argv[argCount]) : -1;

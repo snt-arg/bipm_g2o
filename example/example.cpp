@@ -76,10 +76,10 @@ int main(int argc, char **argv) {
 #endif
 
   int argCount = 1;
-  int solverType = (argc > argCount) ? std::atoi(argv[argCount]) : 0;
-
-  argCount++;
   int numberOfIterations = (argc > argCount) ? std::atoi(argv[argCount]) : 150;
+  
+  argCount++;
+  int solverType = (argc > argCount) ? std::atoi(argv[argCount]) : 0;
 
   argCount++;
   int a = (argc > argCount) ? std::atoi(argv[argCount]) : 2;
@@ -91,13 +91,13 @@ int main(int argc, char **argv) {
   int c = (argc > argCount) ? std::atoi(argv[argCount]) : 50;
 
   argCount++;
-  int xStart = (argc > argCount) ? std::atoi(argv[argCount]) : -10;
+  int xStart = (argc > argCount) ? std::atoi(argv[argCount]) : -40;
 
   argCount++;
-  int yStart = (argc > argCount) ? std::atoi(argv[argCount]) : -10;
+  int yStart = (argc > argCount) ? std::atoi(argv[argCount]) : -20;
 
   argCount++;
-  int zStart = (argc > argCount) ? std::atoi(argv[argCount]) : -10;
+  int zStart = (argc > argCount) ? std::atoi(argv[argCount]) : -40;
 
 // Initialize optimizer
 #ifdef USE_BIPM
@@ -117,13 +117,13 @@ int main(int argc, char **argv) {
 #else
   g2o::SparseOptimizerAL optimizer;
   optimizer.setRhoInitial(
-      1.0); // initial value for the barrier function parameter
+      2.0); // initial value for the barrier function parameter
   optimizer.setRhoUpdateFactor(
-      100.0); // update factor for the barrier function parameter
+      20.0); // update factor for the barrier function parameter
   optimizer.setRhoMax(
-      1.0e10); // maximum value for the barrier function parameter
+      1.0e3); // maximum value for the barrier function parameter
   optimizer.setLagrangeMultiplierInitial(
-      0.0); // initial value for the Lagrangian vertex of the Equality
+      10.0); // initial value for the Lagrangian vertex of the Equality
             // constraints
   optimizer.setInnerIterationsMax(100); // maximum number of inner iterations
 #endif
