@@ -1,22 +1,28 @@
 # BIPM_g2o: Barrier Interior Point Method for Constrained Factor Graph Optimization
 
+[![Paper](https://img.shields.io/badge/Paper-IEEE%20RA--L-blue)](https://ieeexplore.ieee.org/document/11192685)
+
 This repository extends the `g2o` framework with support for **inequality constraints** using the **Barrier Interior Point Method (BIPM)**. It introduces a new class of factor graph nodes that implement logarithmic barrier functions, enabling efficient and robust constrained optimization for robotics control problems such as Model Predictive Control (MPC).
+
+---
 
 ## 🧠 Project Summary
 
 This project provides:
 
-- A g2o extension supporting both equality and inequality constraints.
-- A BIPM-based optimization backend using barrier functions for constraint handling.
-- A demonstration on adaptive cruise control (ACC) using constrained factor graphs.
-- Optional fallback to the Augmented Lagrangian (AL) method.
+- A g2o extension supporting both equality and inequality constraints  
+- A BIPM-based optimization backend using barrier functions  
+- A demonstration on adaptive cruise control (ACC) using constrained factor graphs  
+- Optional fallback to the Augmented Lagrangian (AL) method  
 
-### Reference
+---
 
-> *Barrier Method for Inequality Constrained Factor Graphs Optimization Applied to MPC*  
-> Submitted to IEEE RAL.
+## 📚 Reference
 
-This project introduces BIPM as a robust and efficient alternative to Augmented Lagrangian (AL) for constrained optimization in factor graphs.
+> *Barrier Method for Inequality Constrained Factor Graph Optimization With Application to Model Predictive Control*  
+> Published in IEEE Robotics and Automation Letters (RA-L), 2025.
+
+📄 Paper: https://ieeexplore.ieee.org/document/11192685
 
 ---
 
@@ -26,6 +32,8 @@ This project introduces BIPM as a robust and efficient alternative to Augmented 
 git clone https://github.com/snt-arg/bipm_g2o.git
 cd bipm_g2o
 ```
+
+---
 
 ## 🚀 Quickstart with Docker
 
@@ -52,71 +60,81 @@ make
 
 ---
 
-## 🔧 Manual Installation Without Docker
+## 🔧 Manual Installation (Without Docker)
 
-To set up the environment without Docker, follow these steps:
+### 1. Install Dependencies (Ubuntu 22.04)
 
-1. **Install Dependencies (Ubuntu 22.04)**
+```bash
+sudo apt update
+sudo apt install -y \
+    git cmake build-essential libeigen3-dev libspdlog-dev \
+    libsuitesparse-dev qtdeclarative5-dev qt5-qmake \
+    libqglviewer-dev-qt5 libmetis-dev
+```
 
-   ```bash
-   sudo apt update
-   sudo apt install -y \
-       git cmake build-essential libeigen3-dev libspdlog-dev \
-       libsuitesparse-dev qtdeclarative5-dev qt5-qmake \
-       libqglviewer-dev-qt5 libmetis-dev
-   ```
+---
 
-2. **Clone and Build g2o with Patch**
+### 2. Clone and Build g2o
 
-   ```bash
-   cd /opt
-   git clone https://github.com/RainerKuemmerle/g2o
-   cd g2o
-   git checkout master
-   ```
+```bash
+cd /opt
+git clone https://github.com/RainerKuemmerle/g2o
+cd g2o
+git checkout master
+```
 
-3. **Apply Required Code Patch**
+---
 
-   Edit the file `g2o/core/sparse_optimizer.h`:
+### 3. Apply Required Patch
 
-   Find the line:
-   ```cpp
-     void update(const double* update);
-   ```
+Edit:
 
-   Replace it with:
-   ```cpp
-     virtual void update(const double* update);
-   ```
+```
+g2o/core/sparse_optimizer.h
+```
 
-   This change enables overriding the `update` method required by the BIPM extension.
+Replace:
 
-4. **Build and Install g2o**
+```cpp
+void update(const double* update);
+```
 
-   ```bash
-   mkdir build
-   cd build
-   cmake -DCMAKE_BUILD_TYPE=Release -DG2O_USE_OPENMP=ON -DCMAKE_CXX_FLAGS="-DEIGEN_USE_THREADS -DEIGEN_USE_OPENMP" ..
-   make -j$(nproc)
-   sudo make install
-   ```
+with:
 
-5. **Build Your Application**
+```cpp
+virtual void update(const double* update);
+```
 
-   Assuming you're in your app's build directory:
+---
 
-   ```bash
-   cmake .. -DUSE_BIPM=ON   # or OFF to use AL
-   make
-   ./example
-   ```
+### 4. Build and Install g2o
+
+```bash
+mkdir build
+cd build
+cmake -DCMAKE_BUILD_TYPE=Release \
+      -DG2O_USE_OPENMP=ON \
+      -DCMAKE_CXX_FLAGS="-DEIGEN_USE_THREADS -DEIGEN_USE_OPENMP" ..
+make -j$(nproc)
+sudo make install
+```
+
+---
+
+### 5. Build This Project
+
+```bash
+cmake .. -DUSE_BIPM=ON   # or OFF to use AL
+make
+./example
+```
 
 ---
 
 ## ⚙️ Configuration Flags
 
-- `USE_BIPM=ON`: Enables the Barrier Interior Point Method (default)
-- `USE_BIPM=OFF`: Enables Augmented Lagrangian method instead
+- `USE_BIPM=ON` → Enables Barrier Interior Point Method (default)  
+- `USE_BIPM=OFF` → Uses Augmented Lagrangian method  
 
 ---
 
@@ -125,12 +143,12 @@ To set up the environment without Docker, follow these steps:
 ```
 .
 ├── docker/
-│   ├── Dockerfile         # Reproducible build
-│   └── startup.sh         # Entry point inside container
-├── include/bipm_g2o/      # Header files
-├── examples/              # Demonstrations (e.g., ACC)
-├── CMakeLists.txt         # Build configuration
-├── LICENSE                
+│   ├── Dockerfile
+│   └── startup.sh
+├── include/bipm_g2o/
+├── examples/
+├── CMakeLists.txt
+├── LICENSE
 └── README.md
 ```
 
@@ -138,22 +156,42 @@ To set up the environment without Docker, follow these steps:
 
 ## 🧪 Application: Adaptive Cruise Control
 
-The example application solves a multi-objective adaptive cruise control (ACC) task using factor graph optimization with:
+The example demonstrates a constrained MPC formulation for adaptive cruise control using factor graphs:
 
-- Dynamic constraints
-- Safety distance constraints
-- Force and velocity limits
+- Dynamic system constraints  
+- Safety distance constraints  
+- Force and velocity limits  
 
-The BIPM solver shows faster convergence and better scalability compared to AL, especially for long prediction horizons.
+The BIPM solver shows:
+
+- Faster convergence  
+- Improved numerical stability  
+- Better scalability for long prediction horizons  
+
+---
+
+## 📌 Citation
+
+If you use this work, please cite:
+
+```bibtex
+@article{abdelkarim2025barrier,
+  title={Barrier Method for Inequality Constrained Factor Graph Optimization With Application to Model Predictive Control},
+  author={Abdelkarim, Anas and Görges, Daniel and Voos, Holger},
+  journal={IEEE Robotics and Automation Letters},
+  year={2025},
+  publisher={IEEE}
+}
+```
 
 ---
 
 ## 📜 License
 
-This project is open-source and distributed under GPL-3.0
+This project is open-source and distributed under the GPL-3.0 License.
 
 ---
 
 ## 📫 Acknowledgments
 
-This project is based on the work *“Barrier-Based Factor Graphs for Model Predictive Control,”* submitted to IEEE RAL. It builds on the g2o framework and unifies robotic perception and control via constrained factor graphs.
+This work builds upon the `g2o` framework and is part of ongoing research on unifying perception and control through constrained factor graph optimization.
